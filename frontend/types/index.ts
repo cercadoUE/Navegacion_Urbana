@@ -27,5 +27,5 @@ export interface GraphInfo {
 }
 
 export interface PlacesData {
-  places: Record<string, string[]>;
+  places: Record<string, string>;
 }

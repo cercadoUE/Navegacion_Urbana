@@ -1,30 +1,20 @@
 <template>
   <div class="place-selector glass-card">
-    <h3 class="selector-title">Ubicación</h3>
+    <h3 class="selector-title">Ciudad</h3>
 
     <div class="select-row">
       <label class="select-label">Departamento</label>
-      <select v-model="selectedDept" class="futuristic-select" @change="onDeptChange">
+      <select v-model="selectedDept" class="futuristic-select" @change="onSelect">
         <option value="" disabled>Seleccionar...</option>
-        <option v-for="(districts, dept) in places" :key="dept" :value="dept">
-          {{ dept }}
-        </option>
-      </select>
-    </div>
-
-    <div v-if="selectedDept" class="select-row">
-      <label class="select-label">Distrito</label>
-      <select v-model="selectedDistrict" class="futuristic-select">
-        <option value="" disabled>Seleccionar...</option>
-        <option v-for="d in currentDistricts" :key="d" :value="d">
-          {{ formatDistrict(d) }}
+        <option v-for="(capital, dept) in places" :key="dept" :value="dept">
+          {{ dept }} — {{ extractCity(capital) }}
         </option>
       </select>
     </div>
 
     <button
       class="load-btn"
-      :disabled="!selectedDistrict || loading"
+      :disabled="!selectedDept || loading"
       @click="handleLoad"
     >
       <span v-if="loading" class="btn-spinner" />
@@ -34,21 +24,22 @@
           <path d="M12 3v6h6" />
         </svg>
       </span>
-      {{ loading ? 'Cargando...' : 'Cargar grafo' }}
+      {{ loading ? 'Cargando...' : 'Cargar' }}
     </button>
 
     <div v-if="currentCity" class="current-city">
       <span class="city-dot" />
-      <span class="city-name">{{ formatDistrict(currentCity) }}</span>
+      <div class="city-info">
+        <span class="city-capital">{{ extractCity(currentCity) }}</span>
+        <span class="city-dept">{{ currentDept }}</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { PlacesData } from "~/types";
-
 const props = defineProps<{
-  places: Record<string, string[]>;
+  places: Record<string, string>;
   loading: boolean;
   currentCity: string | null;
 }>();
@@ -58,36 +49,34 @@ const emit = defineEmits<{
 }>();
 
 const selectedDept = ref("");
-const selectedDistrict = ref("");
 
-const currentDistricts = computed(() => {
-  if (!selectedDept.value || !props.places[selectedDept.value]) return [];
-  return props.places[selectedDept.value];
+const currentDept = computed(() => {
+  if (!props.currentCity) return "";
+  for (const [dept, capital] of Object.entries(props.places)) {
+    if (capital === props.currentCity) return dept;
+  }
+  return "";
 });
 
-function onDeptChange() {
-  selectedDistrict.value = "";
+function extractCity(place: string) {
+  return place.split(",")[0];
+}
+
+function onSelect() {
 }
 
 function handleLoad() {
-  if (selectedDistrict.value) {
-    emit("load-graph", selectedDistrict.value);
+  if (selectedDept.value && props.places[selectedDept.value]) {
+    emit("load-graph", props.places[selectedDept.value]);
   }
-}
-
-function formatDistrict(d: string) {
-  return d.replace(/, Peru$/, "").replace(/, (Lima|Peru)$/, "");
 }
 
 watch(() => props.currentCity, (city) => {
   if (city) {
-    for (const [dept, districts] of Object.entries(props.places)) {
-      for (const d of districts) {
-        if (d === city) {
-          selectedDept.value = dept;
-          selectedDistrict.value = d;
-          return;
-        }
+    for (const [dept, capital] of Object.entries(props.places)) {
+      if (capital === city) {
+        selectedDept.value = dept;
+        return;
       }
     }
   }
@@ -196,24 +185,36 @@ watch(() => props.currentCity, (city) => {
 .current-city {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 10px 14px;
   background: rgba(0, 229, 255, 0.06);
   border: 1px solid rgba(0, 229, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .city-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #00e676;
   box-shadow: 0 0 8px #00e676;
+  flex-shrink: 0;
 }
 
-.city-name {
-  font-size: 12px;
+.city-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.city-capital {
+  font-size: 13px;
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.city-dept {
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 </style>

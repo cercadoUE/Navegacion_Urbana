@@ -30,50 +30,31 @@ current_city = "Miraflores, Lima, Peru"
 loading_lock = threading.Lock()
 
 PLACES = {
-    "Lima": [
-        "Miraflores, Lima, Peru",
-        "San Isidro, Lima, Peru",
-        "Barranco, Lima, Peru",
-        "Santiago de Surco, Lima, Peru",
-        "La Molina, Lima, Peru",
-        "San Borja, Lima, Peru",
-        "Jesus Maria, Lima, Peru",
-        "Lince, Lima, Peru",
-        "Magdalena del Mar, Lima, Peru",
-        "San Miguel, Lima, Peru",
-        "Pueblo Libre, Lima, Peru",
-        "Cercado de Lima, Lima, Peru",
-    ],
-    "Cusco": [
-        "Cusco, Peru",
-        "Urubamba, Cusco, Peru",
-        "Ollantaytambo, Cusco, Peru",
-        "Aguas Calientes, Cusco, Peru",
-    ],
-    "Arequipa": [
-        "Arequipa, Peru",
-        "Cayma, Arequipa, Peru",
-        "Yanahuara, Arequipa, Peru",
-        "Cerro Colorado, Arequipa, Peru",
-    ],
-    "Trujillo": [
-        "Trujillo, La Libertad, Peru",
-        "Huanchaco, La Libertad, Peru",
-        "Victor Larco, La Libertad, Peru",
-    ],
-    "Piura": [
-        "Piura, Peru",
-        "Castilla, Piura, Peru",
-    ],
-    "Iquitos": [
-        "Iquitos, Loreto, Peru",
-    ],
-    "Huancayo": [
-        "Huancayo, Junin, Peru",
-    ],
-    "Chiclayo": [
-        "Chiclayo, Lambayeque, Peru",
-    ],
+    "Amazonas": "Chachapoyas, Amazonas, Peru",
+    "Ancash": "Huaraz, Ancash, Peru",
+    "Apurimac": "Abancay, Apurimac, Peru",
+    "Arequipa": "Arequipa, Peru",
+    "Ayacucho": "Ayacucho, Peru",
+    "Cajamarca": "Cajamarca, Peru",
+    "Callao": "Callao, Peru",
+    "Cusco": "Cusco, Peru",
+    "Huancavelica": "Huancavelica, Peru",
+    "Huanuco": "Huanuco, Peru",
+    "Ica": "Ica, Peru",
+    "Junin": "Huancayo, Junin, Peru",
+    "La Libertad": "Trujillo, La Libertad, Peru",
+    "Lambayeque": "Chiclayo, Lambayeque, Peru",
+    "Lima": "Lima, Peru",
+    "Loreto": "Iquitos, Loreto, Peru",
+    "Madre de Dios": "Puerto Maldonado, Madre de Dios, Peru",
+    "Moquegua": "Moquegua, Peru",
+    "Pasco": "Cerro de Pasco, Pasco, Peru",
+    "Piura": "Piura, Peru",
+    "Puno": "Puno, Peru",
+    "San Martin": "Moyobamba, San Martin, Peru",
+    "Tacna": "Tacna, Peru",
+    "Tumbes": "Tumbes, Peru",
+    "Ucayali": "Pucallpa, Ucayali, Peru",
 }
 
 

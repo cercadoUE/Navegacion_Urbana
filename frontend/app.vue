@@ -69,7 +69,7 @@ import { useApi } from "~/composables/useApi";
 
 const { getPlaces, loadGraph, findRoute } = useApi();
 
-const places = ref<Record<string, string[]>>({});
+const places = ref<Record<string, string>>({});
 const currentCity = ref<string | null>(null);
 const graphLoading = ref(true);
 
