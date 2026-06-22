@@ -143,11 +143,18 @@ if __name__ == "__main__":
     import sys
 
     mode = "auto"
-    if len(sys.argv) > 1:
-        if sys.argv[1] in ("--interactive", "-i"):
+    city = "Miraflores, Lima, Peru"
+
+    i = 1
+    while i < len(sys.argv):
+        if sys.argv[i] in ("--interactive", "-i"):
             mode = "interactive"
+        elif sys.argv[i] in ("--city", "-c") and i + 1 < len(sys.argv):
+            city = sys.argv[i + 1]
+            i += 1
+        i += 1
 
     if mode == "interactive":
-        interactive_demo()
+        interactive_demo(city=city)
     else:
-        run_demo()
+        run_demo(city=city)

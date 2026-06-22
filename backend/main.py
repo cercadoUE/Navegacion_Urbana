@@ -1,6 +1,7 @@
 import time
 import sys
 import os
+import threading
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -25,6 +26,55 @@ G = None
 adj = None
 coords = None
 graph_loaded = False
+current_city = "Miraflores, Lima, Peru"
+loading_lock = threading.Lock()
+
+PLACES = {
+    "Lima": [
+        "Miraflores, Lima, Peru",
+        "San Isidro, Lima, Peru",
+        "Barranco, Lima, Peru",
+        "Santiago de Surco, Lima, Peru",
+        "La Molina, Lima, Peru",
+        "San Borja, Lima, Peru",
+        "Jesus Maria, Lima, Peru",
+        "Lince, Lima, Peru",
+        "Magdalena del Mar, Lima, Peru",
+        "San Miguel, Lima, Peru",
+        "Pueblo Libre, Lima, Peru",
+        "Cercado de Lima, Lima, Peru",
+    ],
+    "Cusco": [
+        "Cusco, Peru",
+        "Urubamba, Cusco, Peru",
+        "Ollantaytambo, Cusco, Peru",
+        "Aguas Calientes, Cusco, Peru",
+    ],
+    "Arequipa": [
+        "Arequipa, Peru",
+        "Cayma, Arequipa, Peru",
+        "Yanahuara, Arequipa, Peru",
+        "Cerro Colorado, Arequipa, Peru",
+    ],
+    "Trujillo": [
+        "Trujillo, La Libertad, Peru",
+        "Huanchaco, La Libertad, Peru",
+        "Victor Larco, La Libertad, Peru",
+    ],
+    "Piura": [
+        "Piura, Peru",
+        "Castilla, Piura, Peru",
+    ],
+    "Iquitos": [
+        "Iquitos, Loreto, Peru",
+    ],
+    "Huancayo": [
+        "Huancayo, Junin, Peru",
+    ],
+    "Chiclayo": [
+        "Chiclayo, Lambayeque, Peru",
+    ],
+}
 
 
 class RouteRequest(BaseModel):
@@ -34,19 +84,19 @@ class RouteRequest(BaseModel):
     dest_lon: float
 
 
-class NodeInfo(BaseModel):
-    lat: float
-    lon: float
+class LoadGraphRequest(BaseModel):
+    place: str
 
 
 @app.on_event("startup")
 async def startup():
-    global G, adj, coords, graph_loaded
+    global G, adj, coords, graph_loaded, current_city
     city = os.getenv("CITY", "Miraflores, Lima, Peru")
+    current_city = city
     G = load_city_graph(city=city, network_type="drive")
     adj, coords = graph_to_adjacency(G)
     graph_loaded = True
-    print(f"API lista — {len(adj)} nodos, {sum(len(v) for v in adj.values())} aristas")
+    print(f"API lista — {current_city}: {len(adj)} nodos, {sum(len(v) for v in adj.values())} aristas")
 
 
 @app.get("/api/graph-info")
@@ -55,9 +105,51 @@ def graph_info():
         return {"status": "loading"}
     return {
         "status": "ready",
+        "city": current_city,
         "nodes": len(adj),
         "edges": sum(len(v) for v in adj.values()),
-        "coords": {str(k): {"lat": v[0], "lon": v[1]} for k, v in list(coords.items())[:2]},
+    }
+
+
+@app.get("/api/places")
+def list_places():
+    return {"places": PLACES}
+
+
+@app.post("/api/load-graph")
+def load_graph(req: LoadGraphRequest):
+    global G, adj, coords, graph_loaded, current_city
+
+    if req.place == current_city and graph_loaded:
+        return {"status": "ok", "city": current_city, "nodes": len(adj)}
+
+    if not loading_lock.acquire(blocking=False):
+        return {"status": "error", "message": "Ya se está cargando un grafo"}
+
+    try:
+        graph_loaded = False
+        G = load_city_graph(city=req.place, network_type="drive")
+        adj, coords = graph_to_adjacency(G)
+        current_city = req.place
+        graph_loaded = True
+        return {
+            "status": "ok",
+            "city": current_city,
+            "nodes": len(adj),
+            "edges": sum(len(v) for v in adj.values()),
+        }
+    except Exception as e:
+        graph_loaded = True
+        return {"status": "error", "message": str(e)}
+    finally:
+        loading_lock.release()
+
+
+@app.get("/api/graph-status")
+def graph_status():
+    return {
+        "loaded": graph_loaded,
+        "city": current_city,
     }
 
 

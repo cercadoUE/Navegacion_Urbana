@@ -21,6 +21,11 @@ export interface RouteResponse {
 
 export interface GraphInfo {
   status: string;
+  city: string;
   nodes: number;
   edges: number;
+}
+
+export interface PlacesData {
+  places: Record<string, string[]>;
 }

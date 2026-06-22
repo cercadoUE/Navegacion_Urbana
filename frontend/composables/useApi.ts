@@ -1,10 +1,24 @@
-import type { RouteResponse, GraphInfo } from "~/types";
+import type { RouteResponse, GraphInfo, PlacesData } from "~/types";
 
 const API_BASE = "http://localhost:8000";
 
 export function useApi() {
   async function getGraphInfo(): Promise<GraphInfo> {
     const res = await fetch(`${API_BASE}/api/graph-info`);
+    return res.json();
+  }
+
+  async function getPlaces(): Promise<PlacesData> {
+    const res = await fetch(`${API_BASE}/api/places`);
+    return res.json();
+  }
+
+  async function loadGraph(place: string): Promise<any> {
+    const res = await fetch(`${API_BASE}/api/load-graph`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ place }),
+    });
     return res.json();
   }
 
@@ -27,5 +41,5 @@ export function useApi() {
     return res.json();
   }
 
-  return { getGraphInfo, findRoute };
+  return { getGraphInfo, getPlaces, loadGraph, findRoute };
 }

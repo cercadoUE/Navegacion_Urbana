@@ -15,10 +15,17 @@
         </div>
       </header>
 
+      <PlaceSelector
+        :places="places"
+        :loading="graphLoading"
+        :current-city="currentCity"
+        @load-graph="handleLoadGraph"
+      />
+
       <ControlPanel
         :origin="origin"
         :dest="dest"
-        :loading="loading"
+        :loading="routeLoading"
         :result="result"
         @clear="handleClear"
       />
@@ -31,12 +38,16 @@
         :origin="origin"
         :dest="dest"
         :result="result"
-        :loading="loading"
+        :loading="routeLoading"
         @set-origin="setOrigin"
         @set-dest="setDest"
       />
 
-      <div v-if="!origin" class="map-overlay-hint glass-card">
+      <div v-if="graphLoading" class="map-overlay-hint glass-card loading">
+        <div class="spinner" />
+        <span>Cargando red vial...</span>
+      </div>
+      <div v-else-if="!origin" class="map-overlay-hint glass-card">
         <div class="hint-icon">①</div>
         <span>Haz clic en el mapa para marcar el <strong>ORIGEN</strong></span>
       </div>
@@ -44,7 +55,7 @@
         <div class="hint-icon">②</div>
         <span>Haz clic en el mapa para marcar el <strong>DESTINO</strong></span>
       </div>
-      <div v-else-if="loading" class="map-overlay-hint glass-card loading">
+      <div v-else-if="routeLoading" class="map-overlay-hint glass-card loading">
         <div class="spinner" />
         <span>Calculando rutas...</span>
       </div>
@@ -53,15 +64,53 @@
 </template>
 
 <script setup lang="ts">
-import type { LatLng, RouteResponse } from "~/types";
+import type { LatLng, RouteResponse, PlacesData } from "~/types";
 import { useApi } from "~/composables/useApi";
 
-const { findRoute } = useApi();
+const { getPlaces, loadGraph, findRoute } = useApi();
+
+const places = ref<Record<string, string[]>>({});
+const currentCity = ref<string | null>(null);
+const graphLoading = ref(true);
 
 const origin = ref<LatLng | null>(null);
 const dest = ref<LatLng | null>(null);
-const loading = ref(false);
+const routeLoading = ref(false);
 const result = ref<RouteResponse | null>(null);
+
+async function handleLoadGraph(place: string) {
+  graphLoading.value = true;
+  origin.value = null;
+  dest.value = null;
+  result.value = null;
+  try {
+    const res = await loadGraph(place);
+    if (res.status === "ok") {
+      currentCity.value = res.city;
+    }
+  } catch (e) {
+    console.error(e);
+  } finally {
+    graphLoading.value = false;
+  }
+}
+
+onMounted(async () => {
+  try {
+    const infoRes = await fetch("http://localhost:8000/api/graph-info");
+    const info = await infoRes.json();
+    if (info.status === "ready") {
+      currentCity.value = info.city;
+    }
+  } catch (_) {}
+
+  try {
+    const p = await getPlaces();
+    places.value = p.places;
+  } catch (_) {}
+
+  graphLoading.value = false;
+});
 
 function setOrigin(p: LatLng) {
   origin.value = p;
@@ -80,15 +129,15 @@ function handleClear() {
 }
 
 watch([origin, dest], async ([o, d]) => {
-  if (o && d && !loading.value) {
-    loading.value = true;
+  if (o && d && !routeLoading.value) {
+    routeLoading.value = true;
     result.value = null;
     try {
       result.value = await findRoute(o.lat, o.lon, d.lat, d.lon);
     } catch (e) {
       console.error(e);
     } finally {
-      loading.value = false;
+      routeLoading.value = false;
     }
   }
 });
