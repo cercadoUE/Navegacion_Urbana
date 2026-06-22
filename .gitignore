@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Node
+node_modules/
+.nuxt/
+.output/
+dist/
+
+# OSM data
+*.osm.pbf
+*.osm
+
+# Generated files
+ruta_dijkstra.html
+ruta_astar.html
+comparativa.png
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
