@@ -7,6 +7,10 @@ build/
 .venv/
 venv/
 
+# Word / Office
+*.docx
+*.doc
+
 # OSMnx cache
 cache/
 */cache/
