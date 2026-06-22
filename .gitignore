@@ -16,6 +16,18 @@ cache/
 */cache/
 */*/cache/
 
+# Nuxt build
+.nuxt/
+
+# OSM data
+*.osm.pbf
+*.osm
+
+# Generated files
+ruta_dijkstra.html
+ruta_astar.html
+comparativa.png
+
 # Node
 node_modules/
 .nuxt/
