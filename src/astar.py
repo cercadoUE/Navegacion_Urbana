@@ -14,20 +14,19 @@ def haversine(lat1, lon1, lat2, lon2):
 
 
 def astar(adj, coords, source, target):
-    open_set = BinaryHeap()
-    open_set.push(0.0, source)
-
-    g_score = {source: 0.0}
-    f_score = {source: haversine(*coords[source], *coords[target])}
+    g_score = {v: float("inf") for v in adj}
+    g_score[source] = 0.0
     prev = {}
-    visited = {}
+    visited = set()
+    heap = BinaryHeap()
+    heap.push(0.0, source)
     nodes_explored = 0
 
-    while not open_set.is_empty():
-        _, u = open_set.pop()
+    while not heap.is_empty():
+        _, u = heap.pop()
         if u in visited:
             continue
-        visited[u] = True
+        visited.add(u)
         nodes_explored += 1
 
         if u == target:
@@ -37,12 +36,10 @@ def astar(adj, coords, source, target):
             continue
 
         for v, w in adj[u].items():
-            tentative_g = g_score[u] + w
-            if v not in g_score or tentative_g < g_score[v]:
-                g_score[v] = tentative_g
+            if g_score[u] + w < g_score[v]:
+                g_score[v] = g_score[u] + w
                 prev[v] = u
-                h = haversine(*coords[v], *coords[target])
-                f_score[v] = tentative_g + h
-                open_set.push(f_score[v], v)
+                f = g_score[v] + haversine(*coords[v], *coords[target])
+                heap.push(f, v)
 
     return g_score, prev, nodes_explored

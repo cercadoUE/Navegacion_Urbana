@@ -1,11 +1,11 @@
 from src.heap import BinaryHeap
-import math
 
 
 def dijkstra(adj, source, target=None):
-    dist = {source: 0.0}
+    dist = {v: float("inf") for v in adj}
+    dist[source] = 0.0
     prev = {}
-    visited = {}
+    visited = set()
     heap = BinaryHeap()
     heap.push(0.0, source)
     nodes_explored = 0
@@ -14,7 +14,7 @@ def dijkstra(adj, source, target=None):
         d, u = heap.pop()
         if u in visited:
             continue
-        visited[u] = True
+        visited.add(u)
         nodes_explored += 1
 
         if target is not None and u == target:
@@ -24,11 +24,10 @@ def dijkstra(adj, source, target=None):
             continue
 
         for v, w in adj[u].items():
-            new_dist = d + w
-            if v not in dist or new_dist < dist[v]:
-                dist[v] = new_dist
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
                 prev[v] = u
-                heap.push(new_dist, v)
+                heap.push(dist[v], v)
 
     return dist, prev, nodes_explored
 
