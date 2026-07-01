@@ -48,7 +48,7 @@ const emit = defineEmits<{
   "load-graph": [place: string];
 }>();
 
-const selectedDept = ref("");
+const selectedDept = ref("Lima");
 
 const currentDept = computed(() => {
   if (!props.currentCity) return "";

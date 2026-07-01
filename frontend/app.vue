@@ -97,16 +97,16 @@ async function handleLoadGraph(place: string) {
 
 onMounted(async () => {
   try {
+    const p = await getPlaces();
+    places.value = p.places;
+  } catch (_) {}
+
+  try {
     const infoRes = await fetch("http://localhost:8000/api/graph-info");
     const info = await infoRes.json();
     if (info.status === "ready") {
       currentCity.value = info.city;
     }
-  } catch (_) {}
-
-  try {
-    const p = await getPlaces();
-    places.value = p.places;
   } catch (_) {}
 
   graphLoading.value = false;
