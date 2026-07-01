@@ -11,7 +11,7 @@ from src.astar import astar
 from src.visualization import plot_route_map, plot_comparison
 
 
-def run_demo(city="Miraflores, Lima, Peru"):
+def run_demo(city="Lima, Peru"):
     print("=" * 65)
     print("  Navegación Urbana con Caminos más Cortos — Grupo E")
     print("  Dijkstra vs A* sobre red vial de OpenStreetMap")
@@ -80,7 +80,7 @@ def run_demo(city="Miraflores, Lima, Peru"):
     print("  - comparativa.png     (gráfico comparativo)")
 
 
-def interactive_demo(city="Miraflores, Lima, Peru"):
+def interactive_demo(city="Lima, Peru"):
     print("=" * 65)
     print("  Navegación Urbana con Caminos más Cortos — Grupo E")
     print("  Modo interactivo: elige origen y destino")
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     import sys
 
     mode = "auto"
-    city = "Miraflores, Lima, Peru"
+    city = "Lima, Peru"
 
     i = 1
     while i < len(sys.argv):

@@ -26,7 +26,7 @@ G = None
 adj = None
 coords = None
 graph_loaded = False
-current_city = "Miraflores, Lima, Peru"
+current_city = "Lima, Peru"
 loading_lock = threading.Lock()
 
 PLACES = {
@@ -72,7 +72,7 @@ class LoadGraphRequest(BaseModel):
 @app.on_event("startup")
 async def startup():
     global G, adj, coords, graph_loaded, current_city
-    city = os.getenv("CITY", "Miraflores, Lima, Peru")
+    city = os.getenv("CITY", "Lima, Peru")
     current_city = city
     G = load_city_graph(city=city, network_type="drive")
     adj, coords = graph_to_adjacency(G)
