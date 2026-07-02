@@ -29,3 +29,19 @@ export interface GraphInfo {
 export interface PlacesData {
   places: Record<string, string>;
 }
+
+export interface VisualizeAlgorithmResult {
+  visited: LatLng[];
+  path: LatLng[];
+  distance_km: number;
+  time_s: number;
+  nodes_explored: number;
+  nodes_in_path: number;
+}
+
+export interface VisualizeResponse {
+  dijkstra: VisualizeAlgorithmResult;
+  astar: VisualizeAlgorithmResult;
+  origin: LatLng;
+  dest: LatLng;
+}

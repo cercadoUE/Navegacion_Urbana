@@ -1,6 +1,7 @@
 import time
 import sys
 import os
+import threading
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -10,6 +11,7 @@ from pydantic import BaseModel
 from src.graph_loader import load_city_graph, graph_to_adjacency, get_osm_node
 from src.dijkstra import dijkstra, reconstruct_path
 from src.astar import astar
+from src.visualize_runner import dijkstra_visualize, astar_visualize
 
 app = FastAPI(title="Navegación Urbana API", version="1.0")
 
@@ -175,6 +177,47 @@ def find_route(req: RouteRequest):
             "time_s": round(t3 - t2, 4),
             "nodes_explored": nodes_a,
             "nodes_in_path": len(path_a),
+        },
+        "origin": {"lat": req.origin_lat, "lon": req.origin_lon},
+        "dest": {"lat": req.dest_lat, "lon": req.dest_lon},
+    }
+
+
+@app.post("/api/visualize")
+def visualize_route(req: RouteRequest):
+    if not graph_loaded:
+        return {"error": "Graph not loaded yet"}
+
+    source = get_osm_node(G, req.origin_lat, req.origin_lon)
+    target = get_osm_node(G, req.dest_lat, req.dest_lon)
+
+    if source not in adj or target not in adj:
+        return {"error": "Coordinates not in graph"}
+
+    t0 = time.perf_counter()
+    d_visited, d_path, d_dist, d_nodes = dijkstra_visualize(adj, coords, source, target)
+    t1 = time.perf_counter()
+
+    t2 = time.perf_counter()
+    a_visited, a_path, a_dist, a_nodes = astar_visualize(adj, coords, source, target)
+    t3 = time.perf_counter()
+
+    return {
+        "dijkstra": {
+            "visited": d_visited,
+            "path": d_path,
+            "distance_km": d_dist / 1000 if d_dist != float("inf") else 0,
+            "time_s": round(t1 - t0, 4),
+            "nodes_explored": d_nodes,
+            "nodes_in_path": len(d_path),
+        },
+        "astar": {
+            "visited": a_visited,
+            "path": a_path,
+            "distance_km": a_dist / 1000 if a_dist != float("inf") else 0,
+            "time_s": round(t3 - t2, 4),
+            "nodes_explored": a_nodes,
+            "nodes_in_path": len(a_path),
         },
         "origin": {"lat": req.origin_lat, "lon": req.origin_lon},
         "dest": {"lat": req.dest_lat, "lon": req.dest_lon},

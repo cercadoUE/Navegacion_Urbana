@@ -1,4 +1,4 @@
-import type { RouteResponse, GraphInfo, PlacesData } from "~/types";
+import type { RouteResponse, GraphInfo, PlacesData, VisualizeResponse } from "~/types";
 
 const API_BASE = "http://localhost:8000";
 
@@ -41,5 +41,24 @@ export function useApi() {
     return res.json();
   }
 
-  return { getGraphInfo, getPlaces, loadGraph, findRoute };
+  async function visualizeRoute(
+    originLat: number,
+    originLon: number,
+    destLat: number,
+    destLon: number
+  ): Promise<VisualizeResponse> {
+    const res = await fetch(`${API_BASE}/api/visualize`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        origin_lat: originLat,
+        origin_lon: originLon,
+        dest_lat: destLat,
+        dest_lon: destLon,
+      }),
+    });
+    return res.json();
+  }
+
+  return { getGraphInfo, getPlaces, loadGraph, findRoute, visualizeRoute };
 }

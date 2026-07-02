@@ -5,6 +5,9 @@ export default defineNuxtConfig({
   nitro: {
     preset: "static",
   },
+  experimental: {
+    appManifest: false,
+  },
   app: {
     head: {
       link: [
