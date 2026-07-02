@@ -13,11 +13,40 @@
 <script setup lang="ts">
 import type { LatLng, RouteResponse } from "~/types";
 
+const CITY_COORDS: Record<string, [number, number]> = {
+  "Chachapoyas, Amazonas, Peru": [-6.231, -77.869],
+  "Huaraz, Ancash, Peru": [-9.528, -77.528],
+  "Abancay, Apurimac, Peru": [-13.634, -72.881],
+  "Arequipa, Peru": [-16.399, -71.535],
+  "Ayacucho, Peru": [-13.159, -74.223],
+  "Cajamarca, Peru": [-7.165, -78.513],
+  "Callao, Peru": [-12.052, -77.142],
+  "Cusco, Peru": [-13.518, -71.978],
+  "Huancavelica, Peru": [-12.787, -74.973],
+  "Huanuco, Peru": [-9.927, -76.242],
+  "Ica, Peru": [-14.067, -75.729],
+  "Huancayo, Junin, Peru": [-12.066, -75.211],
+  "Trujillo, La Libertad, Peru": [-8.109, -79.040],
+  "Chiclayo, Lambayeque, Peru": [-6.771, -79.841],
+  "Lima, Peru": [-12.121, -77.030],
+  "Iquitos, Loreto, Peru": [-3.749, -73.247],
+  "Puerto Maldonado, Madre de Dios, Peru": [-12.593, -69.189],
+  "Moquegua, Peru": [-17.195, -70.935],
+  "Cerro de Pasco, Pasco, Peru": [-10.686, -76.257],
+  "Piura, Peru": [-5.193, -80.633],
+  "Puno, Peru": [-15.842, -70.019],
+  "Moyobamba, San Martin, Peru": [-6.036, -76.975],
+  "Tacna, Peru": [-18.014, -70.254],
+  "Tumbes, Peru": [-3.567, -80.441],
+  "Pucallpa, Ucayali, Peru": [-8.384, -74.543],
+};
+
 const props = defineProps<{
   origin: LatLng | null;
   dest: LatLng | null;
   result: RouteResponse | null;
   loading: boolean;
+  currentCity?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -137,6 +166,15 @@ function clearLayers() {
   markers.value = [];
   polylines.value = [];
 }
+
+watch(() => props.currentCity, (city) => {
+  if (!map.value || !city) return;
+  const coords = CITY_COORDS[city];
+  if (coords) {
+    const L = (window as any).L;
+    map.value.setView(coords, 13, { animate: true, duration: 1.5 });
+  }
+});
 
 onUnmounted(() => {
   map.value?.remove();

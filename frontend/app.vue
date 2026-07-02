@@ -37,7 +37,7 @@
       </aside>
 
       <main class="map-area">
-        <MapSection :origin="origin" :dest="dest" :result="result" :loading="routeLoading" @set-origin="setOrigin" @set-dest="setDest" />
+        <MapSection :origin="origin" :dest="dest" :result="result" :loading="routeLoading" :current-city="currentCity" @set-origin="setOrigin" @set-dest="setDest" />
         <div v-if="graphLoading" class="map-overlay-hint glass-card loading">
           <div class="spinner" /><span>Cargando red vial...</span>
         </div>
