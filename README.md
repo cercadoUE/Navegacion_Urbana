@@ -1,9 +1,5 @@
 # Navegación Urbana con Caminos más Cortos
 
-**Grupo E — Análisis y Diseño de Algoritmos 2026**
-
-*Universidad ESAN*
-
 ## Descripción
 
 Buscador de rutas óptimas sobre la red vial de cualquier departamento del Perú utilizando OpenStreetMap. Implementa los algoritmos **Dijkstra** y **A*** con un **heap binario** como cola de prioridad, y compara su rendimiento en un escenario real.
