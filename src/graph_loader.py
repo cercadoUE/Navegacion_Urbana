@@ -1,17 +1,35 @@
+import os
 import osmnx as ox
 import networkx as nx
 
+CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "cache")
+
+
+def _cache_path(city):
+    safe = city.replace(",", "").replace(" ", "_")
+    return os.path.join(CACHE_DIR, f"{safe}.graphml")
+
 
 def load_city_graph(city="Lima, Peru", network_type="drive", local_pbf=None):
-    if local_pbf:
-        print(f"Usando archivo local, extrayendo área de {city}...")
-        G = ox.graph_from_place(city, network_type=network_type)
-    else:
-        print(f"Descargando grafo vial de {city} desde OpenStreetMap...")
-        G = ox.graph_from_place(city, network_type=network_type)
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cache_file = _cache_path(city)
+
+    if os.path.exists(cache_file):
+        print(f"Cargando grafo desde caché: {cache_file}")
+        G = ox.load_graphml(cache_file)
+        print(f"Grafo cargado desde caché: {G.number_of_nodes()} nodos, {G.number_of_edges()} aristas")
+        return G
+
+    print(f"Descargando grafo vial de {city} desde OpenStreetMap...")
+    G = ox.graph_from_place(city, network_type=network_type)
     G = ox.add_edge_speeds(G)
     G = ox.add_edge_travel_times(G)
     print(f"Grafo cargado: {G.number_of_nodes()} nodos, {G.number_of_edges()} aristas")
+
+    print(f"Guardando en caché: {cache_file}")
+    ox.save_graphml(G, cache_file)
+    print("Caché guardada.")
+
     return G
 
 
