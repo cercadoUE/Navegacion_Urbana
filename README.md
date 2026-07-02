@@ -6,11 +6,12 @@
 
 ## Descripción
 
-Buscador de rutas óptimas sobre la red vial de Lima (Perú) utilizando OpenStreetMap. Implementa los algoritmos **Dijkstra** y **A*** con un **heap binario** como cola de prioridad, y compara su rendimiento en un escenario real.
+Buscador de rutas óptimas sobre la red vial de cualquier departamento del Perú utilizando OpenStreetMap. Implementa los algoritmos **Dijkstra** y **A*** con un **heap binario** como cola de prioridad, y compara su rendimiento en un escenario real.
 
-El proyecto tiene dos modos de operación:
+El proyecto tiene tres modos de operación:
 1. **Demo por CLI** (automática o interactiva) — genera mapas HTML estáticos y gráfico comparativo.
-2. **Aplicación Web completa** — backend FastAPI + frontend Nuxt 3 / Vue 3 con mapa Leaflet interactivo donde se seleccionan origen y destino haciendo clic y se visualizan ambas rutas simultáneamente con métricas comparativas en tiempo real.
+2. **Aplicación Web — Home** — backend FastAPI + frontend Nuxt 3 / Vue 3 con mapa Leaflet interactivo donde se seleccionan origen y destino haciendo clic y se visualizan ambas rutas simultáneamente con métricas comparativas en tiempo real.
+3. **Aplicación Web — Visualizar** — dos mapas lado a lado que muestran en tiempo real cómo Dijkstra y A* exploran el grafo nodo por nodo, permitiendo observar visualmente la diferencia en sus estrategias de búsqueda.
 
 ---
 
@@ -30,6 +31,7 @@ El proyecto tiene dos modos de operación:
 │   ├── graph_loader.py              # Carga de grafo desde OpenStreetMap (OSMnx)
 │   ├── dijkstra.py                  # Algoritmo Dijkstra
 │   ├── astar.py                     # Algoritmo A* con heurística Haversine
+│   ├── visualize_runner.py          # Algoritmos con tracking de pasos para animación
 │   └── visualization.py             # Mapas Folium + gráficos Matplotlib
 │
 ├── backend/                         # API REST (FastAPI)
@@ -40,12 +42,14 @@ El proyecto tiene dos modos de operación:
 ├── frontend/                        # Cliente web (Nuxt 3 / Vue 3)
 │   ├── nuxt.config.ts               # Configuración de Nuxt
 │   ├── package.json                 # Dependencias Node.js
-│   ├── app.vue                      # Componente raíz (layout de dos columnas)
+│   ├── app.vue                      # Componente raíz con pestañas Home / Visualizar
 │   ├── assets/css/main.css          # Estilos globales (tema oscuro, glassmorphism, neón)
 │   ├── types/index.ts               # Interfaces TypeScript (LatLng, RouteResult, etc.)
 │   ├── composables/useApi.ts        # Composable para llamadas a la API
 │   └── components/
-│       ├── MapSection.vue           # Mapa Leaflet interactivo
+│       ├── MapSection.vue           # Mapa Leaflet interactivo (Home)
+│       ├── AnimationMap.vue         # Mapa Leaflet animado (Visualizar)
+│       ├── VisualizarView.vue       # Vista de dos mapas lado a lado con controles
 │       ├── ControlPanel.vue         # Panel de control (coordenadas, botón limpiar)
 │       ├── ComparisonPanel.vue      # Panel comparativo Dijkstra vs A*
 │       ├── MetricRow.vue            # Fila de métrica reutilizable
@@ -181,13 +185,19 @@ npm run dev
 # Inicia en http://localhost:3000
 ```
 
-**Uso:**
+**Uso — Home:**
 1. Abrir `http://localhost:3000` en el navegador.
 2. Seleccionar un departamento peruano en el menú desplegable y hacer clic en "Cargar".
 3. Hacer clic en el mapa para colocar el marcador de **origen** (cian "O").
 4. Hacer clic nuevamente para colocar el marcador de **destino** (naranja "D").
 5. Ambas rutas se calculan automáticamente — Dijkstra en cian (línea sólida), A* en naranja (línea punteada).
 6. El panel lateral muestra la comparativa en vivo: tiempo, nodos explorados, distancia, factores de aceleración y gráficos de barras proporcionales.
+
+**Uso — Visualizar:**
+1. En la pestaña **Visualizar**, los mismos puntos de origen y destino seleccionados en Home se cargan automáticamente en dos mapas lado a lado.
+2. Presionar **Iniciar** para ver la animación en tiempo real de cómo Dijkstra (cian) y A* (naranja) exploran el grafo nodo por nodo.
+3. Usar **Pausar** / **Reiniciar** y el slider de **Velocidad** para controlar la animación.
+4. Al completarse, se dibuja el camino final y se muestra el factor de aceleración (speedup).
 
 ---
 
@@ -200,6 +210,7 @@ npm run dev
 | POST | `/api/load-graph` | Cargar un nuevo grafo `{"place": "..."}` |
 | GET | `/api/graph-status` | Indica si hay grafo cargado y cuál es |
 | POST | `/api/route` | Calcular ruta `{"origin_lat": ..., "origin_lon": ..., "dest_lat": ..., "dest_lon": ...}` |
+| POST | `/api/visualize` | Calcular ruta con tracking de nodos visitados para animación `{"origin_lat": ..., "origin_lon": ..., "dest_lat": ..., "dest_lon": ...}` |
 
 Ejemplo con curl:
 ```bash
@@ -234,9 +245,10 @@ curl -X POST http://localhost:8000/api/route \
 
 ## Dataset
 
-- Red vial de Lima desde OpenStreetMap vía OSMnx.
+- Red vial de cualquier departamento del Perú desde OpenStreetMap vía OSMnx (25 departamentos disponibles).
 - Archivo local opcional: `peru-260621.osm.pbf` (Perú completo).
 - Los grafos descargados se cachean en `cache/` y `backend/cache/` para evitar descargas repetidas.
+- Al cargar un nuevo departamento, el mapa se centra automáticamente en su capital.
 
 ---
 
@@ -248,4 +260,5 @@ Este proyecto fue diseñado para un curso universitario de algoritmos. Las decis
 - **Dijkstra y A* desde cero** — no se utilizan las funciones de caminos mínimos de NetworkX.
 - **Heurística Haversine** — ejemplo real de heurística admisible y consistente.
 - **Comparativa visual** — evidencia cuantitativa de por qué A* es superior para búsqueda punto a punto.
-- **Datos reales** — la red vial real de Lima hace el proyecto tangible y relevante.
+- **Visualización en vivo** — animación nodo por nodo que muestra visualmente la expansión radial de Dijkstra vs la búsqueda dirigida de A*.
+- **Datos reales** — la red vial real de cualquier departamento del Perú hace el proyecto tangible y relevante.
